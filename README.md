@@ -1,4 +1,4 @@
-# This is a test commit (verified test)
+# This is a test commit (config email check )
 
 # PawPal+ (Module 2 Project)
 
