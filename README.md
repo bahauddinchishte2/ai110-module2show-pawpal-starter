@@ -1,5 +1,3 @@
-# This is a test commit (config email check )
-
 # PawPal+ (Module 2 Project)
 
 You are building **PawPal+**, a Streamlit app that helps a pet owner plan care tasks for their pet.
@@ -46,14 +44,14 @@ pip install -r requirements.txt
 
 ## 🖥️ Sample Output
 
-Paste a sample of your app's CLI or Streamlit output here so a reader can see what a generated plan looks like:
+Running `python3 main.py` prints a readable CLI schedule:
 
 ```
-# e.g.:
-# Daily plan for Biscuit (Golden Retriever):
-#   08:00 — Morning walk (30 min) [priority: high]
-#   09:00 — Feeding (10 min) [priority: high]
-#   ...
+Today's Schedule for Jordan
+=============================
+07:30 | Luna: Breakfast feeding (10 min) [priority: high] [pending]
+08:00 | Mochi: Morning walk (30 min) [priority: high] [pending]
+18:00 | Mochi: Heartworm medication (5 min) [priority: medium] [pending]
 ```
 
 ## 🧪 Testing PawPal+
