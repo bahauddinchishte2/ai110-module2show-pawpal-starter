@@ -4,8 +4,15 @@
 
 **a. Initial design**
 
-- Briefly describe your initial UML design.
-- What classes did you include, and what responsibilities did you assign to each?
+Three core user actions I want PawPal+ to support are:
+
+- Add a pet to an owner's profile.
+- Schedule care tasks such as feeding, walks, medication, or appointments.
+- View an organized daily schedule with conflicts or recurring tasks handled by the system.
+
+My initial UML design uses four main classes: `Owner`, `Pet`, `Task`, and `Scheduler`. `Owner` stores the person using the app and manages a list of pets. `Pet` stores basic pet details and the tasks assigned to that pet. `Task` represents one care activity, including its title, time, due date, duration, priority, frequency, and completion status. `Scheduler` acts as the system's organizing layer. It retrieves tasks from the owner and pets, sorts tasks by time, filters tasks by pet or status, detects scheduling conflicts, and handles recurring tasks.
+
+I chose this structure because it keeps each class focused on one responsibility. The pet and task classes model the real-world data, while the scheduler handles logic that crosses multiple pets.
 
 **b. Design changes**
 
