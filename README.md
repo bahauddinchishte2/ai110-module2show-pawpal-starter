@@ -77,19 +77,31 @@ Completed 'Breakfast feeding' and created next 'Breakfast feeding' for 2026-07-0
 
 ## 🧪 Testing PawPal+
 
+Run the automated test suite from an activated virtual environment:
+
 ```bash
-# Run the full test suite:
-pytest
-
-# Run with coverage:
-pytest --cov
+python -m pytest
 ```
 
-Sample test output:
+The tests cover core PawPal+ scheduling reliability: marking tasks complete, adding tasks to pets, chronological sorting, daily recurrence creation, and duplicate-time conflict detection.
 
+Successful test output:
+
+```text
+============================= test session starts ==============================
+platform darwin -- Python 3.14.5, pytest-9.1.1, pluggy-1.6.0
+rootdir: /Users/bu7/_dev-project-pc/Codepath/ai110-module2show-pawpal-starter
+plugins: anyio-4.14.1
+collected 5 items
+
+tests/test_pawpal.py .....                                               [100%]
+
+============================== 5 passed in 0.01s ===============================
 ```
-# Paste your pytest output here
-```
+
+**Confidence Level:** ★★★★☆ 4/5
+
+The current tests give strong confidence in the core scheduler behaviors, especially sorting, recurrence, and exact-time conflict detection. More tests for invalid input, monthly recurrence, and UI workflows would raise confidence further.
 
 ## 📐 Smarter Scheduling
 
