@@ -1,12 +1,10 @@
 # AI Interactions Log
 
-> **Stretch features only.** Only fill in the sections that apply to stretch features you attempted. If you did not attempt a stretch feature, leave its section blank or delete it. This file is not required for the core project.
+This log documents how I used an AI coding agent for the optional PawPal+ extensions.
 
 ---
 
-## Agent Workflow (SF7)
-
-> Document your experience using an AI agent (e.g., Cursor Agent, Claude, Copilot) to make multi-step changes autonomously.
+## Agent Workflow
 
 **What task did you give the agent?**
 
@@ -36,22 +34,3 @@ The agent ran syntax checks with `python3 -m py_compile` and ran the test suite 
 I verified that a custom dictionary approach was better than adding a library like `marshmallow` because the project only needs simple dataclass serialization. I also checked that `data.json` should be ignored by git so local app state does not get committed accidentally.
 
 The main manual review step was making sure the new optional features did not break the original scheduler behavior. The final pytest run passed with 7 tests, including the original sorting, recurrence, and conflict tests.
-
----
-
-## Prompt Comparison (SF11)
-
-> Compare two different prompts (or two different models) on the same task.
-
-| | Option A | Option B |
-|-|----------|----------|
-| **Model / tool used** | | |
-| **Prompt** | | |
-| **Response summary** | | |
-| **What was useful** | | |
-| **Problems noticed** | | |
-| **Decision** | | |
-
-**Which approach did you use in your final implementation and why?**
-
-<!-- Your conclusion -->
