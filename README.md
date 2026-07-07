@@ -44,14 +44,35 @@ pip install -r requirements.txt
 
 ## 🖥️ Sample Output
 
-Running `python3 main.py` prints a readable CLI schedule:
+Running `python3 main.py` prints a readable CLI schedule with sorting, filtering, conflict warnings, and recurring task behavior:
 
 ```
-Today's Schedule for Jordan
-=============================
-07:30 | Luna: Breakfast feeding (10 min) [priority: high] [pending]
-08:00 | Mochi: Morning walk (30 min) [priority: high] [pending]
-18:00 | Mochi: Heartworm medication (5 min) [priority: medium] [pending]
+Today's Sorted Schedule for Jordan
+====================================
+08:00 | Mochi: Heartworm medication (5 min) [priority: medium] [pending]
+08:00 | Luna: Breakfast feeding (10 min) [priority: high] [pending]
+09:00 | Mochi: Morning walk (30 min) [priority: high] [pending]
+19:30 | Luna: Evening playtime (20 min) [priority: medium] [pending]
+
+Mochi's Tasks
+=============
+08:00 | Heartworm medication [medium]
+09:00 | Morning walk [high]
+
+Pending Tasks
+=============
+08:00 | Mochi: Heartworm medication
+08:00 | Luna: Breakfast feeding
+09:00 | Mochi: Morning walk
+19:30 | Luna: Evening playtime
+
+Conflict Warnings
+=================
+Warning: 08:00: multiple tasks scheduled (Heartworm medication, Breakfast feeding)
+
+Recurring Task Demo
+===================
+Completed 'Breakfast feeding' and created next 'Breakfast feeding' for 2026-07-08.
 ```
 
 ## 🧪 Testing PawPal+
@@ -72,14 +93,12 @@ Sample test output:
 
 ## 📐 Smarter Scheduling
 
-> Fill in once you've implemented scheduling logic.
-
 | Feature | Method(s) | Notes |
 |---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+| Task sorting | `Scheduler.sort_by_time()` | Sorts tasks by `HH:MM` time strings so the daily plan appears chronologically. |
+| Filtering | `Scheduler.filter_by_pet()`, `Scheduler.filter_by_status()` | Shows one pet's tasks or tasks matching a completion state. |
+| Conflict handling | `Scheduler.detect_conflicts()` | Returns warning messages when multiple tasks are scheduled at the same exact time. |
+| Recurring tasks | `Task.create_next_occurrence()`, `Scheduler.complete_task()` | Completing a daily or weekly task creates the next task occurrence on the correct future date. |
 
 ## 📸 Demo Walkthrough
 

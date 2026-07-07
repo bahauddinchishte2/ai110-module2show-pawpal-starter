@@ -25,13 +25,15 @@ I chose this structure because it keeps each class focused on one responsibility
 
 **a. Constraints and priorities**
 
-- What constraints does your scheduler consider (for example: time, priority, preferences)?
-- How did you decide which constraints mattered most?
+The scheduler currently considers due date, scheduled time, pet name, completion status, and task frequency. Due date matters because `get_today_tasks()` should only show tasks that belong on today's plan. Time matters because pet owners need a schedule they can follow in order. Pet name and completion status matter because the owner may want to focus on one pet or only see tasks that still need attention. Frequency matters because daily and weekly tasks should continue after they are completed.
+
+I prioritized time sorting and completion status first because they make the schedule immediately useful in both the CLI and the UI. I treated priority as descriptive for now instead of using it to reorder tasks, because Phase 4 specifically required sorting by time and the app is still a simple care planner.
 
 **b. Tradeoffs**
 
-- Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
+One tradeoff is that conflict detection only checks for exact time matches, such as two tasks both scheduled at `08:00`. It does not calculate whether task durations overlap, such as an `08:00` task lasting 45 minutes and an `08:30` task starting before the first one ends.
+
+This tradeoff is reasonable for the current version because exact-time conflicts are easy for a beginner-friendly scheduler to explain and test. A duration-overlap algorithm would be more realistic, but it would add complexity before the core object relationships and CLI workflow are fully established.
 
 ---
 

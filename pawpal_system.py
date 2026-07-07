@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import date, timedelta
 
 
 @dataclass
@@ -24,7 +24,21 @@ class Task:
 
     def create_next_occurrence(self) -> "Task | None":
         """Create the next recurring task when this task repeats."""
-        return None
+        if self.frequency == "daily":
+            next_date = self.due_date + timedelta(days=1)
+        elif self.frequency == "weekly":
+            next_date = self.due_date + timedelta(weeks=1)
+        else:
+            return None
+
+        return Task(
+            title=self.title,
+            time=self.time,
+            due_date=next_date,
+            duration_minutes=self.duration_minutes,
+            priority=self.priority,
+            frequency=self.frequency,
+        )
 
 
 @dataclass
@@ -101,9 +115,30 @@ class Scheduler:
 
     def detect_conflicts(self, tasks: list[Task]) -> list[str]:
         """Return warnings for tasks scheduled at the same time."""
-        return []
+        conflicts: list[str] = []
+        tasks_by_time: dict[str, list[Task]] = {}
+
+        for task in tasks:
+            tasks_by_time.setdefault(task.time, []).append(task)
+
+        for task_time, scheduled_tasks in tasks_by_time.items():
+            if len(scheduled_tasks) > 1:
+                task_titles = ", ".join(task.title for task in scheduled_tasks)
+                conflicts.append(f"{task_time}: multiple tasks scheduled ({task_titles})")
+
+        return conflicts
 
     def complete_task(self, task: Task) -> Task | None:
         """Complete a task and return its next occurrence when recurring."""
         task.mark_complete()
-        return task.create_next_occurrence()
+        next_task = task.create_next_occurrence()
+
+        if next_task is None:
+            return None
+
+        for pet in self.owner.pets:
+            if task in pet.tasks:
+                pet.add_task(next_task)
+                return next_task
+
+        return next_task
