@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
+from pathlib import Path
+from typing import Any
 
 
 @dataclass
@@ -21,6 +24,31 @@ class Task:
     def mark_complete(self) -> None:
         """Mark this task as completed."""
         self.completed = True
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert this task into JSON-friendly data."""
+        return {
+            "title": self.title,
+            "time": self.time,
+            "due_date": self.due_date.isoformat(),
+            "duration_minutes": self.duration_minutes,
+            "priority": self.priority,
+            "frequency": self.frequency,
+            "completed": self.completed,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Task":
+        """Create a task from JSON-friendly data."""
+        return cls(
+            title=str(data["title"]),
+            time=str(data["time"]),
+            due_date=date.fromisoformat(str(data["due_date"])),
+            duration_minutes=int(data["duration_minutes"]),
+            priority=str(data.get("priority", "medium")),
+            frequency=str(data.get("frequency", "once")),
+            completed=bool(data.get("completed", False)),
+        )
 
     def create_next_occurrence(self) -> "Task | None":
         """Create the next recurring task when this task repeats."""
@@ -54,6 +82,25 @@ class Pet:
         """Add a care task to this pet."""
         self.tasks.append(task)
 
+    def to_dict(self) -> dict[str, Any]:
+        """Convert this pet and its tasks into JSON-friendly data."""
+        return {
+            "name": self.name,
+            "species": self.species,
+            "age": self.age,
+            "tasks": [task.to_dict() for task in self.tasks],
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Pet":
+        """Create a pet and its tasks from JSON-friendly data."""
+        return cls(
+            name=str(data["name"]),
+            species=str(data["species"]),
+            age=int(data.get("age", 0)),
+            tasks=[Task.from_dict(task_data) for task_data in data.get("tasks", [])],
+        )
+
     def get_pending_tasks(self) -> list[Task]:
         """Return this pet's incomplete tasks."""
         return [task for task in self.tasks if not task.completed]
@@ -69,6 +116,39 @@ class Owner:
     def add_pet(self, pet: Pet) -> None:
         """Add a pet to this owner."""
         self.pets.append(pet)
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert this owner and all pets into JSON-friendly data."""
+        return {
+            "name": self.name,
+            "pets": [pet.to_dict() for pet in self.pets],
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Owner":
+        """Create an owner from JSON-friendly data."""
+        return cls(
+            name=str(data["name"]),
+            pets=[Pet.from_dict(pet_data) for pet_data in data.get("pets", [])],
+        )
+
+    def save_to_json(self, file_path: str | Path) -> None:
+        """Save owner, pet, and task data to a JSON file."""
+        path = Path(file_path)
+        path.write_text(json.dumps(self.to_dict(), indent=2), encoding="utf-8")
+
+    @classmethod
+    def load_from_json(
+        cls,
+        file_path: str | Path,
+        default_name: str = "Jordan",
+    ) -> "Owner":
+        """Load owner data from JSON, or return a new owner when no file exists."""
+        path = Path(file_path)
+        if not path.exists():
+            return cls(name=default_name)
+
+        return cls.from_dict(json.loads(path.read_text(encoding="utf-8")))
 
     def find_pet(self, name: str) -> Pet | None:
         """Find a pet by name."""
@@ -101,6 +181,29 @@ class Scheduler:
     def sort_by_time(self, tasks: list[Task]) -> list[Task]:
         """Return tasks sorted by their scheduled time."""
         return sorted(tasks, key=lambda task: task.time)
+
+    def find_next_available_slot(
+        self,
+        target_date: date | None = None,
+        start_time: str = "08:00",
+        end_time: str = "20:00",
+        interval_minutes: int = 30,
+    ) -> str | None:
+        """Return the next open start time on a day using fixed time intervals."""
+        schedule_date = target_date or date.today()
+        occupied_times = {
+            task.time for task in self.owner.get_all_tasks() if task.due_date == schedule_date
+        }
+        current_slot = datetime.strptime(start_time, "%H:%M")
+        final_slot = datetime.strptime(end_time, "%H:%M")
+
+        while current_slot <= final_slot:
+            candidate = current_slot.strftime("%H:%M")
+            if candidate not in occupied_times:
+                return candidate
+            current_slot += timedelta(minutes=interval_minutes)
+
+        return None
 
     def filter_by_pet(self, pet_name: str) -> list[Task]:
         """Return tasks for one pet."""

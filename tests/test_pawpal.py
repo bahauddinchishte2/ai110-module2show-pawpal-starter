@@ -114,3 +114,62 @@ def test_scheduler_flags_duplicate_task_times():
     assert conflicts == [
         "08:00: multiple tasks scheduled (Morning walk, Breakfast feeding)"
     ]
+
+
+def test_owner_data_saves_and_loads_from_json(tmp_path):
+    file_path = tmp_path / "data.json"
+    owner = Owner(name="Jordan")
+    pet = Pet(name="Mochi", species="dog", age=3)
+    pet.add_task(
+        Task(
+            title="Morning walk",
+            time="09:00",
+            due_date=date(2026, 7, 7),
+            duration_minutes=30,
+            priority="high",
+            frequency="daily",
+        )
+    )
+    owner.add_pet(pet)
+
+    owner.save_to_json(file_path)
+    loaded_owner = Owner.load_from_json(file_path)
+
+    assert loaded_owner.name == "Jordan"
+    assert loaded_owner.pets[0].name == "Mochi"
+    assert loaded_owner.pets[0].tasks[0].title == "Morning walk"
+    assert loaded_owner.pets[0].tasks[0].due_date == date(2026, 7, 7)
+    assert loaded_owner.pets[0].tasks[0].frequency == "daily"
+
+
+def test_scheduler_finds_next_available_slot():
+    target_date = date(2026, 7, 7)
+    owner = Owner(name="Jordan")
+    pet = Pet(name="Luna", species="cat", age=5)
+    owner.add_pet(pet)
+    scheduler = Scheduler(owner)
+    pet.add_task(
+        Task(
+            title="Breakfast feeding",
+            time="08:00",
+            due_date=target_date,
+            duration_minutes=10,
+        )
+    )
+    pet.add_task(
+        Task(
+            title="Medication",
+            time="08:30",
+            due_date=target_date,
+            duration_minutes=5,
+        )
+    )
+
+    next_slot = scheduler.find_next_available_slot(
+        target_date=target_date,
+        start_time="08:00",
+        end_time="09:00",
+        interval_minutes=30,
+    )
+
+    assert next_slot == "09:00"

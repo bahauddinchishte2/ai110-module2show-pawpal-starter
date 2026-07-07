@@ -16,8 +16,9 @@ I chose this structure because it keeps each class focused on one responsibility
 
 **b. Design changes**
 
-- Did your design change during implementation?
-- If yes, describe at least one change and why you made it.
+Yes. My initial design treated tasks mostly as static items on a list, but the final implementation needed tasks to create future tasks when they repeat. I added `Task.create_next_occurrence()` so each task owns the simple recurrence rule for daily and weekly repeats.
+
+I also made `Scheduler` the place where cross-pet logic lives. Instead of having each `Pet` sort or compare tasks independently, `Scheduler` reads all tasks from `Owner`, filters them by date/pet/status, sorts them, detects conflicts, and completes recurring tasks. That made the UI and tests simpler because they can call one scheduling layer instead of duplicating logic.
 
 ---
 
@@ -41,13 +42,15 @@ This tradeoff is reasonable for the current version because exact-time conflicts
 
 **a. How you used AI**
 
-- How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
-- What kinds of prompts or questions were most helpful?
+I used AI to brainstorm edge cases, draft focused pytest functions, check whether the UI reflected the backend logic, and polish documentation. The most helpful prompts were specific and testable, such as asking for important scheduler edge cases or asking which UML changes matched the final implementation.
+
+AI was especially useful for turning broad project requirements into concrete engineering tasks: sorting tests, recurrence tests, conflict warnings, final README sections, and a final UML file.
 
 **b. Judgment and verification**
 
-- Describe one moment where you did not accept an AI suggestion as-is.
-- How did you evaluate or verify what the AI suggested?
+I did not treat generated tests as correct just because they looked reasonable. I checked them against the actual method names and return values in `pawpal_system.py`, then ran `python -m pytest` to verify they passed.
+
+I also verified the Streamlit changes by running syntax checks and starting the app locally. That helped confirm that the UI code was not only descriptive, but actually connected to the `Scheduler` methods.
 
 ---
 
@@ -55,13 +58,15 @@ This tradeoff is reasonable for the current version because exact-time conflicts
 
 **a. What you tested**
 
-- What behaviors did you test?
-- Why were these tests important?
+I tested marking a task complete, adding a task to a pet, sorting tasks chronologically, creating the next daily task after completion, and detecting duplicate task times.
+
+These tests are important because they cover the core promise of PawPal+: the app should organize care tasks reliably, preserve pet/task relationships, continue recurring routines, and warn owners when the schedule has an obvious conflict.
 
 **b. Confidence**
 
-- How confident are you that your scheduler works correctly?
-- What edge cases would you test next if you had more time?
+My confidence level is 4 out of 5 stars. The scheduler works for the main happy paths and the most important beginner-friendly edge case: exact duplicate times.
+
+If I had more time, I would test invalid inputs, pets with no tasks, multiple pets with overlapping schedules, weekly recurrence, monthly recurrence, leap-day behavior, and duration-based conflicts where tasks overlap even if they do not start at the exact same time.
 
 ---
 
@@ -69,12 +74,14 @@ This tradeoff is reasonable for the current version because exact-time conflicts
 
 **a. What went well**
 
-- What part of this project are you most satisfied with?
+I am most satisfied with how the same backend logic now appears in three places: tests, the CLI demo, and the Streamlit UI. Sorting, conflict detection, filtering, and recurrence are not just hidden methods; the user can see and use them.
 
 **b. What you would improve**
 
-- If you had another iteration, what would you improve or redesign?
+In another iteration, I would redesign time handling to use actual `datetime` objects instead of `HH:MM` strings. That would make duration-overlap conflicts, time zones, and date/time sorting more reliable.
+
+I would also add IDs to tasks. Right now the app identifies tasks by object references and display labels, which is fine for a small in-memory app, but IDs would be better for editing, deleting, persistence, and avoiding ambiguity when two tasks have the same title and time.
 
 **c. Key takeaway**
 
-- What is one important thing you learned about designing systems or working with AI on this project?
+My biggest takeaway is that AI is strongest when I use it as a design and verification partner, not as a replacement for judgment. The useful pattern was: ask for ideas, compare them to the code, implement a small change, run tests, then document what the system actually does.

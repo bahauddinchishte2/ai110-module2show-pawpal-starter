@@ -1,6 +1,6 @@
 # PawPal+ (Module 2 Project)
 
-You are building **PawPal+**, a Streamlit app that helps a pet owner plan care tasks for their pet.
+**PawPal+** is a Streamlit app that helps a pet owner plan daily care tasks for their pets.
 
 ## Scenario
 
@@ -10,17 +10,20 @@ A busy pet owner needs help staying consistent with pet care. They want an assis
 - Consider constraints (time available, priority, owner preferences)
 - Produce a daily plan and explain why it chose that plan
 
-Your job is to design the system first (UML), then implement the logic in Python, then connect it to the Streamlit UI.
+This project includes a small scheduling backend, a Streamlit interface, pytest coverage, and a final Mermaid UML diagram.
 
-## What you will build
+## What the App Does
 
-Your final app should:
+PawPal+ lets a pet owner:
 
-- Let a user enter basic owner + pet info
-- Let a user add/edit tasks (duration + priority at minimum)
-- Generate a daily schedule/plan based on constraints and priorities
-- Display the plan clearly (and ideally explain the reasoning)
-- Include tests for the most important scheduling behaviors
+- Enter basic owner and pet information
+- Add pet care tasks with due date, time, duration, priority, and recurrence
+- View today's schedule sorted by time
+- See warnings when two tasks are scheduled at the exact same time
+- Find the next available 30-minute care slot for today
+- Filter tasks by pet and completion status
+- Mark tasks complete and automatically create the next daily or weekly occurrence
+- Save pets and tasks to `data.json` so they persist between app runs
 
 ## Getting started
 
@@ -32,21 +35,104 @@ source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### Suggested workflow
+### Run the Streamlit App
 
-1. Read the scenario carefully and identify requirements and edge cases.
-2. Draft a UML diagram (classes, attributes, methods, relationships).
-3. Convert UML into Python class stubs (no logic yet).
-4. Implement scheduling logic in small increments.
-5. Add tests to verify key behaviors.
-6. Connect your logic to the Streamlit UI in `app.py`.
-7. Refine UML so it matches what you actually built.
-
-## 🖥️ Sample Output
-
-Running `python3 main.py` prints a readable CLI schedule with sorting, filtering, conflict warnings, and recurring task behavior:
-
+```bash
+streamlit run app.py
 ```
+
+### Run the CLI Demo
+
+```bash
+python3 main.py
+```
+
+## Features
+
+- **Sorting by time:** `Scheduler.sort_by_time()` returns tasks in chronological order using their `HH:MM` scheduled time.
+- **Today's schedule:** `Scheduler.get_today_tasks()` filters the owner's tasks to only the tasks due today.
+- **Pet and status filters:** `Scheduler.filter_by_pet()` and `Scheduler.filter_by_status()` help the UI focus on one pet or pending/completed tasks.
+- **Conflict warnings:** `Scheduler.detect_conflicts()` flags exact duplicate task times and shows the affected task names.
+- **Next available slot:** `Scheduler.find_next_available_slot()` scans today's schedule and returns the first open fixed-interval start time.
+- **Daily and weekly recurrence:** `Scheduler.complete_task()` marks a task complete and adds the next occurrence for recurring tasks.
+- **JSON persistence:** `Owner.save_to_json()` and `Owner.load_from_json()` use custom dictionary conversion to save and reload owner, pet, and task data.
+- **Owner, pet, and task model:** `Owner`, `Pet`, and `Task` keep the scheduling data organized and easy to test.
+
+## Persistence Workflow
+
+PawPal+ stores runtime data in `data.json`. When the Streamlit app starts, it calls `Owner.load_from_json("data.json")`; if the file does not exist yet, the app starts with a new owner profile. When a user adds a pet, adds a task, marks a task complete, or clicks **Save data**, the app calls `Owner.save_to_json("data.json")`.
+
+The persistence code uses custom `to_dict()` and `from_dict()` methods instead of adding a serialization library. This keeps the project lightweight and makes the date conversion explicit: task due dates are saved as ISO strings and loaded back with `date.fromisoformat()`.
+
+Files modified for this extension:
+
+- `pawpal_system.py`: added JSON serialization methods and the next-slot scheduling helper.
+- `app.py`: added save/reload controls, automatic saves after key actions, and next-slot display.
+- `tests/test_pawpal.py`: added tests for JSON persistence and next available slot logic.
+- `.gitignore`: ignored runtime `data.json`.
+- `ai_interactions.md`: documented the agent workflow for the optional extension.
+
+## System Architecture
+
+The final Mermaid UML source is saved at `diagrams/uml_final.mmd`. It reflects the final implementation in `pawpal_system.py`, including the relationships between `Owner`, `Pet`, `Task`, and `Scheduler`.
+
+## 🧪 Testing PawPal+
+
+Run the automated test suite from an activated virtual environment:
+
+```bash
+python -m pytest
+```
+
+The tests cover core PawPal+ scheduling reliability: marking tasks complete, adding tasks to pets, chronological sorting, daily recurrence creation, and duplicate-time conflict detection.
+
+Successful test output:
+
+```text
+============================= test session starts ==============================
+platform darwin -- Python 3.14.5, pytest-9.1.1, pluggy-1.6.0
+rootdir: /Users/bu7/_dev-project-pc/Codepath/ai110-module2show-pawpal-starter
+plugins: anyio-4.14.1
+collected 7 items
+
+tests/test_pawpal.py .......                                             [100%]
+
+============================== 7 passed in 0.02s ===============================
+```
+
+**Confidence Level:** ★★★★☆ 4/5
+
+The current tests give strong confidence in the core scheduler behaviors, especially sorting, recurrence, and exact-time conflict detection. More tests for invalid input, monthly recurrence, and UI workflows would raise confidence further.
+
+## Smarter Scheduling
+
+| Feature | Method(s) | Notes |
+|---------|-----------|-------|
+| Task sorting | `Scheduler.sort_by_time()` | Sorts tasks by `HH:MM` time strings so the daily plan appears chronologically. |
+| Next open slot | `Scheduler.find_next_available_slot()` | Suggests the first available fixed-interval start time for today's care plan. |
+| Filtering | `Scheduler.filter_by_pet()`, `Scheduler.filter_by_status()` | Shows one pet's tasks or tasks matching a completion state. |
+| Conflict handling | `Scheduler.detect_conflicts()` | Returns warning messages when multiple tasks are scheduled at the same exact time. |
+| Recurring tasks | `Task.create_next_occurrence()`, `Scheduler.complete_task()` | Completing a daily or weekly task creates the next task occurrence on the correct future date. |
+| Persistence | `Owner.save_to_json()`, `Owner.load_from_json()` | Saves and reloads owner, pet, and task data through `data.json`. |
+
+## Demo Walkthrough
+
+The Streamlit app starts with an owner profile and pet list. A user can add pets, then create tasks with a title, due date, scheduled time, duration, priority, and frequency.
+
+Example workflow:
+
+1. Add a pet such as Mochi the dog or Luna the cat.
+2. Add tasks like "Morning walk" at `09:00`, "Breakfast feeding" at `08:00`, or "Medication" at `08:00`.
+3. Review the current task table, which is sorted by time through the Scheduler.
+4. Check Today's Smart Schedule to see only today's tasks in chronological order.
+5. If two tasks share the same exact time, the app shows a `st.warning` conflict message with the time and task names.
+6. Check the suggested next available 30-minute slot for another care task.
+7. Use the filter controls to focus on one pet or only pending/done tasks.
+8. Mark a recurring daily or weekly task complete; the app creates the next occurrence automatically and saves it to `data.json`.
+
+Running `python3 main.py` prints the same core scheduler behavior in the terminal:
+
+```text
 Today's Sorted Schedule for Jordan
 ====================================
 08:00 | Mochi: Heartworm medication (5 min) [priority: medium] [pending]
@@ -74,52 +160,3 @@ Recurring Task Demo
 ===================
 Completed 'Breakfast feeding' and created next 'Breakfast feeding' for 2026-07-08.
 ```
-
-## 🧪 Testing PawPal+
-
-Run the automated test suite from an activated virtual environment:
-
-```bash
-python -m pytest
-```
-
-The tests cover core PawPal+ scheduling reliability: marking tasks complete, adding tasks to pets, chronological sorting, daily recurrence creation, and duplicate-time conflict detection.
-
-Successful test output:
-
-```text
-============================= test session starts ==============================
-platform darwin -- Python 3.14.5, pytest-9.1.1, pluggy-1.6.0
-rootdir: /Users/bu7/_dev-project-pc/Codepath/ai110-module2show-pawpal-starter
-plugins: anyio-4.14.1
-collected 5 items
-
-tests/test_pawpal.py .....                                               [100%]
-
-============================== 5 passed in 0.01s ===============================
-```
-
-**Confidence Level:** ★★★★☆ 4/5
-
-The current tests give strong confidence in the core scheduler behaviors, especially sorting, recurrence, and exact-time conflict detection. More tests for invalid input, monthly recurrence, and UI workflows would raise confidence further.
-
-## 📐 Smarter Scheduling
-
-| Feature | Method(s) | Notes |
-|---------|-----------|-------|
-| Task sorting | `Scheduler.sort_by_time()` | Sorts tasks by `HH:MM` time strings so the daily plan appears chronologically. |
-| Filtering | `Scheduler.filter_by_pet()`, `Scheduler.filter_by_status()` | Shows one pet's tasks or tasks matching a completion state. |
-| Conflict handling | `Scheduler.detect_conflicts()` | Returns warning messages when multiple tasks are scheduled at the same exact time. |
-| Recurring tasks | `Task.create_next_occurrence()`, `Scheduler.complete_task()` | Completing a daily or weekly task creates the next task occurrence on the correct future date. |
-
-## 📸 Demo Walkthrough
-
-Describe your app in numbered steps so a reader can follow along without watching a video:
-
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
-
-**Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->
